@@ -61,6 +61,8 @@
 
 ## 安装
 
+### Codex
+
 把这个仓库克隆到 Codex skills 目录：
 
 ```bash
@@ -79,6 +81,16 @@ Use $clarity-map
 ```text
 我工作几年了，会一些东西，但不知道这些能力能组合成什么方向。
 ```
+
+### 其他平台
+
+这个仓库的原生格式是 Codex skill。其他平台通常不能直接识别 `SKILL.md` 的技能协议，但可以把它当成提示词/知识库导入：
+
+- **Coze / 扣子 / Bot 平台**：把 `SKILL.md` 放进角色指令，把 `references/` 里的文件作为知识库或附加指令分批导入。
+- **普通 ChatGPT / Claude 项目**：把 `SKILL.md` 作为系统/项目指令，把 `references/output_templates.md` 和 `references/diagnosis_framework.md` 作为补充规则。
+- **只想复用诊断卡**：直接使用 `scripts/render_diagnosis_card.py` 和 `assets/diagnosis_card_style.json`。
+
+注意：不同平台对系统指令、文件知识库、工具调用的支持不一样。迁移时优先保留状态机、输出契约、非越界规则和闭环结束规则。
 
 ## 开始时怎么用
 
@@ -109,6 +121,24 @@ skill 会让用户先选一个状态：
 先给我个初版。
 ```
 
+## 效果展示
+
+诊断卡示例：
+
+![摄影点评服务验证](examples/photographer_card.png)
+
+示例对话片段：
+
+```text
+用户：选 4。我是自由摄影师，想做个人摄影教学，但一直停在课程大纲和素材准备里，没有真正开始。
+
+Clarity Map：你不是没有方向，你已经有粗方向：从接单摄影师发展个人摄影教学。现在它还停在“准备课程”的状态，没有变成能拿到反馈的小实验。我先问 4 个问题……
+
+用户：最常被问的是接单报价、客户沟通和现场应变。最愿意测试 1 对 1 点评学员作品。最卡的是不知道有没有人愿意付费，也不知道怎么开口招募。
+
+Clarity Map：你现在缺的不是课程大纲，而是一个低风险的付费反馈证据。先做 14 天新人摄影作品点评测试：1 份模板 + 3 次点评测试，验证是否有人愿意付费或转介绍。
+```
+
 ## 设计原则
 
 - **提问少，但要准**：通常每轮只问 2-4 个问题。
@@ -123,6 +153,14 @@ skill 会让用户先选一个状态：
 
 ```bash
 python scripts/render_diagnosis_card.py --data card_data.json --out diagnosis-card.svg
+```
+
+也可以直接运行仓库里的示例：
+
+```bash
+python scripts/render_diagnosis_card.py \
+  --data examples/photographer_card_data.json \
+  --out examples/photographer_card.svg
 ```
 
 诊断卡采用固定的 **Canonical Diagnosis Card v1**：
@@ -159,16 +197,63 @@ python scripts/render_diagnosis_card.py --data card_data.json --out diagnosis-ca
 clarity-map/
 ├── SKILL.md
 ├── README.md
+├── CHANGELOG.md
+├── LICENSE
+├── requirements.txt
 ├── assets/
 │   └── diagnosis_card_style.json
+├── examples/
+│   ├── photographer_card_data.json
+│   ├── photographer_card.png
+│   ├── photographer_card.svg
+│   └── regression_cases.md
 ├── references/
 │   ├── questioning_framework.md
 │   ├── diagnosis_framework.md
 │   ├── output_templates.md
 │   └── visual_templates.md
-└── scripts/
-    └── render_diagnosis_card.py
+├── scripts/
+│   └── render_diagnosis_card.py
+└── tests/
+    └── test_render_diagnosis_card.py
 ```
+
+## 依赖
+
+诊断卡渲染脚本只使用 Python 标准库。仓库提供 `requirements.txt`，当前没有第三方依赖。
+
+运行测试：
+
+```bash
+python -m unittest
+```
+
+验证 Codex skill 结构：
+
+```bash
+python ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py .
+```
+
+如果你的系统没有这个校验脚本，也可以先跳过；它只用于检查 `SKILL.md` 的基础结构。
+
+## 维护
+
+仓库里有一组手动回归案例：
+
+```text
+examples/regression_cases.md
+```
+
+这些案例来自多轮真实测试，用来防止改动时把已经修好的问题改坏。重点检查：
+
+- 是否过度提问
+- 阶段诊断和最终结果是否混淆
+- 是否给出具体价格数字或法律/医疗/合规判断
+- 最终结果是否缺少实验、结果卡、诊断图或完成边界
+- 诊断卡是否仍然使用 Canonical Diagnosis Card v1
+- 结果是否以「重新开始」作为唯一内置重启入口
+
+重要改动请记录到 `CHANGELOG.md`。
 
 ## 边界
 
@@ -181,6 +266,17 @@ clarity-map/
 - 无限陪聊式追问
 
 如果用户表达明显的自伤风险、强烈危机或无法保证安全，skill 会暂停方向诊断流程，建议优先联系现实中的可信任的人、当地紧急资源或专业支持。
+
+## 已知限制
+
+- 这是一个方向澄清工具，不是完整的商业执行系统。
+- 诊断卡目前是固定 SVG 模板；如果要适配更多品牌视觉，需要另开模板版本，不建议在单次诊断里自由换风格。
+- 其他平台导入方式需要按平台能力微调，仓库只保证 Codex skill 原生格式。
+- 回归测试目前以手动案例为主，自动化测试只覆盖诊断卡渲染脚本。
+
+## License
+
+MIT License. See `LICENSE`.
 
 ## 状态
 
