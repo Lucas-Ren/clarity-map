@@ -1,0 +1,86 @@
+{
+  "version": "1.0",
+  "status": "canonical-v1",
+  "name": "clarity-map-diagnosis-card",
+  "role": "sole official visual template for Clarity Map diagnosis cards",
+  "change_policy": "change data only per case; do not change palette, layout, brand mark, section order, or schema unless the user explicitly requests a brand/template redesign",
+  "ratio": "3:4",
+  "size": {
+    "width": 900,
+    "height": 1200
+  },
+  "palette": {
+    "background": "#F4F7F6",
+    "surface": "#FFFFFF",
+    "ink": "#111827",
+    "muted": "#5B6670",
+    "accent": "#0F766E",
+    "accent_soft": "#E6F3F1",
+    "secondary": "#F59E0B",
+    "border": "#DCE5E2"
+  },
+  "brand": {
+    "mark": "CM",
+    "text": "Clarity Map",
+    "completion_mark": "本轮诊断已完成 · 不满意可重新开始",
+    "footer": "Clarity Map"
+  },
+  "type": {
+    "font_family": "PingFang SC, Hiragino Sans GB, Microsoft YaHei, Noto Sans CJK SC, Arial, sans-serif",
+    "title": 48,
+    "section_label": 23,
+    "body": 25,
+    "small": 20,
+    "footer": 20
+  },
+  "schema": [
+    {
+      "key": "diagnosis",
+      "label": "一句话诊断",
+      "required": true,
+      "max_lines": 2
+    },
+    {
+      "key": "assets",
+      "label": "已验证资产",
+      "required": true,
+      "max_items": 3
+    },
+    {
+      "key": "candidates",
+      "label": "候选方向",
+      "required": true,
+      "max_items": 3,
+      "display": "labels_only"
+    },
+    {
+      "key": "experiment",
+      "label": "最小实验",
+      "required": true,
+      "fields": ["timebox", "core_action"],
+      "max_lines": 2
+    },
+    {
+      "key": "signals",
+      "label": "验证信号",
+      "required": true,
+      "fields": ["pass", "fail"],
+      "max_lines": 2
+    },
+    {
+      "key": "cta",
+      "label": "下一步",
+      "required": true,
+      "max_lines": 1
+    }
+  ],
+  "rules": {
+    "title_max_chars": 18,
+    "diagnosis_max_chars": 34,
+    "asset_max_chars": 14,
+    "candidate_max_chars": 12,
+    "experiment_max_chars": 34,
+    "signal_max_chars": 28,
+    "cta_max_chars": 18
+  }
+}
